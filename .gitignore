@@ -73,3 +73,31 @@ datasets
 
 # Mimic
 *.npz
+
+# Local assistant/editor state
+.codex/
+
+# Local training outputs
+logs/
+runs/
+outputs/
+checkpoints/
+wandb/
+tensorboard/
+videos/
+
+# Model artifacts
+*.pt
+*.pth
+*.onnx
+*.jit
+*.ckpt
+*.pkl
+*.pickle
+*.npz
+
+# Local generated/heavy assets
+unitree_usd/
+
+# Local backup folders
+*备份/
