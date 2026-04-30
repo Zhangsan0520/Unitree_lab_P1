@@ -1,0 +1,31 @@
+FSM:
+  _:
+    Passive:
+      id: 1
+      type: PassiveP1
+    FixStand:
+      id: 2
+      type: FixStandP1
+    Velocity:
+      id: 3
+      type: RLBase
+
+  Passive:
+    mode: [1,1,1,1,1,1,1,1,1,1,1,1]
+    kd: [3,3,3,4,3,2,3,3,3,4,3,2]
+    centering_kp: [0,18,0,0,0,0,0,18,0,0,0,0]
+    centering_q:  [0,-0.04,0,0,0,0,0,0.04,0,0,0,0]
+
+  FixStand:
+    kp: [70,60,100,75,45,60,70,60,100,75,45,60]
+    kd: [4,4,6,5,6,10,4,4,6,5,6,10]
+    ts: [0, 3]
+    qs:
+      - []
+      - [
+          -0.45,0.0,0.0,0.8,-0.3,0.0,
+          -0.45,0.0,0.0,0.8,-0.3,0.0
+        ]
+
+  Velocity:
+    policy_dir: /work/Projects/unitree_rl_lab/logs/rsl_rl/unitree_p1_walkx/2026-04-19_17-01-07
