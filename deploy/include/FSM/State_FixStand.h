@@ -15,6 +15,16 @@ public:
         ts_ = param::config["FSM"]["FixStand"]["ts"].as<std::vector<float>>();
         qs_ = param::config["FSM"]["FixStand"]["qs"].as<std::vector<std::vector<float>>>();
         assert(ts_.size() == qs_.size());
+
+        // [NEW] no-joystick auto transition: FixStand -> Velocity after reaching target pose
+        this->registered_checks.emplace_back(std::make_pair(
+            [this]()->bool {
+                if (t0_ <= 0) return false;
+                double t = (double)unitree::common::GetCurrentTimeMillisecond() * 1e-3 - t0_;
+                return t > (double)ts_.back() + 0.5;
+            },
+            FSMStringMap.right.at("Velocity")
+        ));
     }
 
     void enter()
@@ -51,7 +61,7 @@ public:
     }
 
 private:
-    double t0_;
+    double t0_ = 0.0;
     std::vector<float> ts_;
     std::vector<std::vector<float>> qs_;
 };

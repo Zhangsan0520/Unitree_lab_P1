@@ -59,3 +59,25 @@ def ang_vel_cmd_levels(
             ).tolist()
 
     return torch.tensor(ranges.ang_vel_z[1], device=env.device)
+
+
+def push_robot_velocity_levels(
+    env: ManagerBasedRLEnv,
+    env_ids: Sequence[int],
+    event_term_name: str = "push_robot",
+    start_x: float = 0.05,
+    start_y: float = 0.03,
+    end_x: float = 0.50,
+    end_y: float = 0.30,
+    num_steps: int = 20000,
+) -> torch.Tensor:
+    """Linearly increase push disturbance velocity ranges during training."""
+    progress = min(float(env.common_step_counter) / float(max(num_steps, 1)), 1.0)
+    x_vel = start_x + progress * (end_x - start_x)
+    y_vel = start_y + progress * (end_y - start_y)
+
+    event_term = env.event_manager.get_term_cfg(event_term_name)
+    event_term.params["velocity_range"]["x"] = (-x_vel, x_vel)
+    event_term.params["velocity_range"]["y"] = (-y_vel, y_vel)
+
+    return torch.tensor(x_vel, device=env.device)

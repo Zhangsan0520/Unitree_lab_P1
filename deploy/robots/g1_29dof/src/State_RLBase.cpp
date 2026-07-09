@@ -13,20 +13,41 @@ REGISTER_OBSERVATION(keyboard_velocity_commands)
     std::string key = FSMState::keyboard->key();
     static auto cfg = env->cfg["commands"]["base_velocity"]["ranges"];
 
-    static std::unordered_map<std::string, std::vector<float>> key_commands = {
-        {"w", {1.0f, 0.0f, 0.0f}},
-        {"s", {-1.0f, 0.0f, 0.0f}},
-        {"a", {0.0f, 1.0f, 0.0f}},
-        {"d", {0.0f, -1.0f, 0.0f}},
-        {"q", {0.0f, 0.0f, 1.0f}},
-        {"e", {0.0f, 0.0f, -1.0f}}
+    static const float vx_pos = cfg["lin_vel_x"][1].as<float>();
+    static const float vx_neg = cfg["lin_vel_x"][0].as<float>();
+    static const float vy_pos = cfg["lin_vel_y"][1].as<float>();
+    static const float vy_neg = cfg["lin_vel_y"][0].as<float>();
+    static const float wz_pos = cfg["ang_vel_z"][1].as<float>();
+    static const float wz_neg = cfg["ang_vel_z"][0].as<float>();
+
+    // 目标命令改成“静态保持”
+    static std::vector<float> target_cmd = {0.0f, 0.0f, 0.0f};
+    static std::vector<float> cmd = {0.0f, 0.0f, 0.0f};
+
+    // 单键锁存控制
+    if (key == "w") target_cmd = {vx_pos, 0.0f, 0.0f};
+    else if (key == "s") target_cmd = {vx_neg, 0.0f, 0.0f};
+    else if (key == "a") target_cmd = {0.0f, vy_pos, 0.0f};
+    else if (key == "d") target_cmd = {0.0f, vy_neg, 0.0f};
+    else if (key == "q") target_cmd = {0.0f, 0.0f, 1.5f * wz_pos};
+    else if (key == "e") target_cmd = {0.0f, 0.0f, 1.5f * wz_neg};
+    else if (key == "x") target_cmd = {0.0f, 0.0f, 0.0f};   // 停止/清零
+
+    auto step_towards = [](float current, float target, float max_delta) -> float {
+        float diff = target - current;
+        if (diff > max_delta) diff = max_delta;
+        if (diff < -max_delta) diff = -max_delta;
+        return current + diff;
     };
-    std::vector<float> cmd = {0.0f, 0.0f, 0.0f};
-    if (key_commands.find(key) != key_commands.end())
-    {
-        // TODO: smooth and limit the velocity commands
-        cmd = key_commands[key];
-    }
+
+    const float dvx = 0.01f;
+    const float dvy = 0.01f;
+    const float dwz = 0.015f;
+
+    cmd[0] = step_towards(cmd[0], target_cmd[0], dvx);
+    cmd[1] = step_towards(cmd[1], target_cmd[1], dvy);
+    cmd[2] = step_towards(cmd[2], target_cmd[2], dwz);
+
     return cmd;
 }
 

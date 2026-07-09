@@ -55,4 +55,4 @@ FSM:
   Velocity:
     transitions: 
       Passive: LT + B.on_pressed
-    policy_dir: ../../../logs/rsl_rl/unitree_g1_23dof_velocity
+    policy_dir: ../../../logs/rsl_rl/unitree_g1_23dof_velocity/2026-03-18_09-59-55

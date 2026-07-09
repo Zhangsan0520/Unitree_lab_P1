@@ -126,7 +126,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.02, 0.02), "y": (-0.02, 0.02), "pitch": (0.02, 0.04), "yaw": (-0.02, 0.02)},
+            "pose_range": {"x": (-0.02, 0.02), "y": (-0.02, 0.02), "pitch": (-0.01, 0.01), "yaw": (-0.02, 0.02)},
             "velocity_range": {
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
@@ -152,7 +152,7 @@ class EventCfg:
         func=mdp.push_by_setting_velocity,
         mode="interval",
         interval_range_s=(4.0, 6.0),
-        params={"velocity_range": {"x": (-0.25, 0.25), "y": (-0.15, 0.15)}},
+        params={"velocity_range": {"x": (-0.05, 0.05), "y": (-0.03, 0.03)}},
     )
 
 
@@ -187,15 +187,15 @@ class ActionsCfg:
     JointPositionAction = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"],
-        scale=0.12,
+        scale=0.1,
         use_default_offset=True,
         clip={
-            ".*hip_roll.*": (-0.03, 0.03),
-            ".*hip_yaw.*": (-0.05, 0.05),
-            ".*ankle_roll.*": (-0.06, 0.06),
-            ".*hip_pitch.*": (-0.35, 0.35),
-            ".*knee_pitch.*": (-0.55, 0.55),
-            ".*ankle_pitch.*": (-0.25, 0.25),
+            ".*hip_roll.*": (-0.15, 0.15),
+            ".*hip_yaw.*": (-0.20, 0.20),
+            ".*ankle_roll.*": (-0.12, 0.12),
+            ".*hip_pitch.*": (-0.5, 0.30),
+            ".*knee_pitch.*": (0.0, 0.8),
+            ".*ankle_pitch.*": (-0.40, 0.25),
         },
     )
 
@@ -210,7 +210,7 @@ class ObservationsCfg:
 
         # observation terms (order preserved)
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, noise=Unoise(n_min=-0.2, n_max=0.2))
-        projected_gravity = ObsTerm(func=mdp.projected_gravity, noise=Unoise(n_min=-0.05, n_max=0.05))
+        projected_gravity = ObsTerm(func=mdp.projected_gravity, noise=Unoise(n_min=-0.1, n_max=0.1))
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
         joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
         joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, noise=Unoise(n_min=-1.5, n_max=1.5))
@@ -311,8 +311,8 @@ class RewardsCfg:
     )
 
     # -- robot
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-8.0)
-    base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.655})
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-12.0)
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.645})
 
     # -- feet
     gait = RewTerm(
@@ -351,7 +351,7 @@ class RewardsCfg:
     )
     leg_joint_mirror = RewTerm(
         func=mdp.joint_mirror,
-        weight=-0.5,
+        weight=-0.0,
         params={
             "asset_cfg": SceneEntityCfg("robot"),
             "mirror_joints": [
@@ -390,7 +390,17 @@ class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
     terrain_levels = CurrTerm(func=mdp.terrain_levels_vel)
-    lin_vel_cmd_levels = CurrTerm(mdp.lin_vel_cmd_levels)
+    push_robot_velocity_levels = CurrTerm(
+        func=mdp.push_robot_velocity_levels,
+        params={
+            "event_term_name": "push_robot",
+            "start_x": 0.05,
+            "start_y": 0.03,
+            "end_x": 0.20,
+            "end_y": 0.20,
+            "num_steps": 20000,
+        },
+    )
 
 
 @configclass

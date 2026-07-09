@@ -198,15 +198,27 @@ class ActionsCfg:
     JointPositionAction = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=[".*"],
-        scale=1.0,
+        scale={
+            ".*hip_roll.*": 0.08,
+            ".*hip_yaw.*": 0.08,
+
+            # 主要负责迈步，不能太小
+            ".*hip_pitch.*": 0.30,
+            ".*knee_pitch.*": 0.30,
+            ".*ankle_pitch.*": 0.15,
+
+            # roll 方向最容易抖，保守
+            ".*ankle_roll.*": 0.08,
+        },
         use_default_offset=True,
         clip={
-            ".*hip_roll.*": (-0.10, 0.10),
-            ".*hip_yaw.*": (-0.10, 0.10),
-            ".*ankle_roll.*": (-0.12, 0.12),
-            ".*hip_pitch.*": (-0.70, 0.20),
-            ".*knee_pitch.*": (0.20, 1.10),
-            ".*ankle_pitch.*": (-0.60, 0.20),
+            ".*hip_roll.*": (-0.12, 0.12),
+            ".*hip_yaw.*": (-0.12, 0.12),
+            ".*ankle_roll.*": (-0.08, 0.08),
+
+            ".*hip_pitch.*": (-0.3, 0.3),
+            ".*knee_pitch.*": (0.0, 0.450),
+            ".*ankle_pitch.*": (-0.10, 0.10),
         },
     )
 
@@ -275,11 +287,11 @@ class RewardsCfg:
     # -------------------------
     base_linear_velocity = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.5)
     base_angular_velocity = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.25)
-    joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-0.001)
-    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.06)
+    joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-0.0025)
+    joint_acc = RewTerm(func=mdp.joint_acc_l2, weight=-1.5e-6)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.12)
     dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-5.0)
-    energy = RewTerm(func=mdp.energy, weight=-2e-5)
+    energy = RewTerm(func=mdp.energy, weight=-5e-5)
 
     joint_deviation_legs = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -294,7 +306,7 @@ class RewardsCfg:
 
     # 一起训练时优先学稳
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-2.0)
-    base_height = RewTerm(func=mdp.base_height_l2, weight=-2.0, params={"target_height": 0.59})
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-2.0, params={"target_height": 0.64})
 
     # -------------------------
     # feet / gait

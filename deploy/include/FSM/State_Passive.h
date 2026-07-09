@@ -20,7 +20,17 @@ public:
                 lowcmd->msg_.motor_cmd()[i].mode() = values[i];
             }
         }
-    } 
+
+        // [NEW] no-joystick auto transition: Passive -> FixStand (id=2) once
+        this->registered_checks.emplace_back(std::make_pair(
+            [triggered=false]() mutable -> bool {
+                if (triggered) return false;
+                triggered = true;
+                return true;
+            },
+            FSMStringMap.right.at("FixStand")
+        ));
+    }
 
     void enter()
     {

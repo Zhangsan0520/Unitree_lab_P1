@@ -101,3 +101,7 @@ unitree_usd/
 
 # Local backup folders
 *备份/
+
+# 忽略特定的文件夹
+outputs/
+logs/
