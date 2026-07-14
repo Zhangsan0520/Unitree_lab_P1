@@ -97,7 +97,9 @@ videos/
 *.npz
 
 # Local generated/heavy assets
-unitree_usd/
+unitree_usd/*
+!unitree_usd/p1/
+!unitree_usd/p1/**
 
 # Local backup folders
 *备份/
